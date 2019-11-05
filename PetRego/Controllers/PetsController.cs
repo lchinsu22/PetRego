@@ -7,6 +7,10 @@ Build 103 :
     Used PetService methods to handle requests for CRUD operations on Pet Entity.
     Provides the Response in Type of petDTO Entity. Response also contains HATEOAS links
 
+Build 104 :
+    Added Unity Container Package to register Pet service interface with Pet service class. The configuration is added in WebApiConfig.
+    Provides complete independency. i.e. Pet Controller is completely independent of pet class implementation.
+
 */
 
 using System;
@@ -26,7 +30,7 @@ namespace PetRego.Controllers
 {
     public class PetsController : ApiController
     {
-        private IPetService petservice = new PetService();
+        private IPetService petservice;
 
         public PetsController() { }
 

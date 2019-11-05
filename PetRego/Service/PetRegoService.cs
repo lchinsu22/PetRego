@@ -18,7 +18,7 @@ namespace PetRego.Service
 {
     public class OwnerService : IDisposable, IOwnerService
     {
-        private IPetRegoContext db = new PetRegoContext();
+        private IPetRegoContext db;
 
         public OwnerService() { }
 
