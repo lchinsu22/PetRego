@@ -42,6 +42,9 @@ namespace PetRego.Models
         public string PetType { get; set; }
 
         public int OwnerId { get; set; }
+
+        //"JsonIgnore" data annotation allows the Model to be flattened and provide a required Json Response.
+        //The relation between Owner and Pet Entities is still maintained.
         [JsonIgnore]
         public virtual Owner Owner { get; set; }
     }

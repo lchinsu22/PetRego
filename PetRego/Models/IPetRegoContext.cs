@@ -2,8 +2,13 @@
 Interface defines the Context. 
 Allows for Dependency Injection on Context. Used in Testing.
 
-Build 101 :
+Build 102 :
     Added Conext Class Methods Defitions.
+    Suggestion for future build - could use Generics to remove dependency on Entity in MarkAsModified method. 
+
+Build 103 :
+    Added overload for MarkAsModified methods to remove type dependency while calling the methods.
+    Suggestion for future build - Look into using Genrics to remove dependency.
 
 */
 
@@ -22,7 +27,7 @@ namespace PetRego.Models
         DbSet<Owner> Owners { get; }
         DbSet<Pet> Pets { get; }
         int SaveChanges();
-        void MarkOwnerAsModified(Owner item);
-        void MarkPetAsModified(Pet item);
+        void MarkAsModified(Owner item);
+        void MarkAsModified(Pet item);
     }
 }

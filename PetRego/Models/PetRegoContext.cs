@@ -31,12 +31,12 @@ namespace PetRego.Models
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Pet> Pets { get; set; }
 
-        public void MarkOwnerAsModified(Owner item)
+        public void MarkAsModified(Owner item)
         {
             Entry(item).State = EntityState.Modified;
         }
 
-        public void MarkPetAsModified(Pet item)
+        public void MarkAsModified(Pet item)
         {
             Entry(item).State = EntityState.Modified;
         }
