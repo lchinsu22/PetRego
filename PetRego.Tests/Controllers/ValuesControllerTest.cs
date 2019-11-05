@@ -10,7 +10,7 @@ using PetRego.Controllers;
 
 namespace PetRego.Tests.Controllers
 {
-    [TestClass]
+    //[TestClass]
     public class ValuesControllerTest
     {
         [TestMethod]

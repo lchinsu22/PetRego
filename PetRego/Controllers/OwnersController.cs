@@ -1,6 +1,5 @@
 ﻿/*
-Contains OwnersController class with method definitions for CRUD operations.
-
+Contains OwnersController class with method definitions for CRUD operations on Owner Entity.
 
 Build 101 :
     Added Methods for CRUD operations which accepts and provides Owner Entity.
@@ -8,6 +7,12 @@ Build 101 :
 Build 102 :
     Added contructor with Context interface parameter to allow Dependency injection for Context class.
     Removed Controller's dependency on Entity Framework.
+
+Build 103 :
+    Updated constructor with service interface parameter to allow Dependency injection for service class. Allows Unit Testing.
+    Used OwnerService methods to handle requests for CRUD operations on Owner Entity.
+    Changes the Response in Type of OwnerDTO instead of Owner. Allows Response to contain HATEOAS links
+    Added Unit Testing in Tests package to perform unit testing.
 
 
 */
@@ -23,42 +28,47 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using PetRego.Models;
+using PetRego.Service;
 
 namespace PetRego.Controllers
 {
     public class OwnersController : ApiController
     {
-        private IPetRegoContext db = new PetRegoContext();
+        private IOwnerService ownerservice = new OwnerService();
 
         public OwnersController() { }
 
-        //Constructor based Dependency Injection
-        public OwnersController(IPetRegoContext context)
+        public OwnersController(IOwnerService _ownerservice)
         {
-            db = context;
+            this.ownerservice = _ownerservice;
         }
 
         // GET: api/Owners
-        public IQueryable<Owner> GetOwners()
+        [Route("api/Owners", Name = "GetOwners")]
+        public IQueryable<OwnerDTO> GetOwners()
         {
-            return db.Owners;
+            string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            IQueryable<OwnerDTO> ownerdtos = ownerservice.GetAll(url);
+            return ownerdtos;
         }
 
         // GET: api/Owners/5
-        [ResponseType(typeof(Owner))]
+        [Route("api/Owners/{id}", Name = "GetOwnerById")]
+        [ResponseType(typeof(OwnerDTO))]
         public IHttpActionResult GetOwner(int id)
         {
-            Owner owner = db.Owners.Find(id);
-            if (owner == null)
+            string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            OwnerDTO ownerdto = ownerservice.GetDTOByID(id, url);
+            if (ownerdto == null)
             {
                 return NotFound();
             }
-
-            return Ok(owner);
+            return Ok(ownerdto);
         }
 
         // PUT: api/Owners/5
-        [ResponseType(typeof(void))]
+        [Route("api/Owners/{id}", Name = "UpdateOwners")]
+        [ResponseType(typeof(OwnerDTO))]
         public IHttpActionResult PutOwner(int id, Owner owner)
         {
             if (!ModelState.IsValid)
@@ -70,57 +80,78 @@ namespace PetRego.Controllers
             {
                 return BadRequest();
             }
-
-            //Build 102 - calling the method from Context removing Controller's dependency on Entity Framework.
-            db.MarkOwnerAsModified(owner);
-
+            if (!ownerservice.OwnerExists(id))
+            {
+                return NotFound();
+            }
+            OwnerDTO ownerdto = new OwnerDTO();
             try
             {
-                db.SaveChanges();
+                string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+                ownerdto = ownerservice.Update(owner, url);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OwnerExists(id))
+                if (!ownerservice.OwnerExists(id))
                 {
                     return NotFound();
                 }
                 else
                 {
-                    throw;
+                    return InternalServerError();
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok(ownerdto);
         }
 
         // POST: api/Owners
-        [ResponseType(typeof(Owner))]
+        [Route("api/Owners", Name = "CreateOwners")]
+        [ResponseType(typeof(OwnerDTO))]
         public IHttpActionResult PostOwner(Owner owner)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            OwnerDTO ownerdto = new OwnerDTO();
+            try
+            {
+                string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+                ownerdto = ownerservice.Add(owner, url);
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
 
-            db.Owners.Add(owner);
-            db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = owner.OwnerId }, owner);
+            return Created("CreateOwners", ownerdto);
         }
 
         // DELETE: api/Owners/5
+        [Route("api/Owners/{id}", Name = "DeleteOwners")]
         [ResponseType(typeof(Owner))]
         public IHttpActionResult DeleteOwner(int id)
         {
-            Owner owner = db.Owners.Find(id);
+            Owner owner = ownerservice.GetByID(id);
             if (owner == null)
             {
                 return NotFound();
             }
 
-            db.Owners.Remove(owner);
-            db.SaveChanges();
+            try
+            {
+                ownerservice.Remove(owner);
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e);
+            }
 
+            if (!ownerservice.OwnerExists(id))
+            {
+                return Ok(owner);
+            }
             return Ok(owner);
         }
 
@@ -128,14 +159,9 @@ namespace PetRego.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                ownerservice.Dispose();
             }
             base.Dispose(disposing);
-        }
-
-        private bool OwnerExists(int id)
-        {
-            return db.Owners.Count(e => e.OwnerId == id) > 0;
         }
     }
 }
