@@ -6,6 +6,9 @@ Build 101 :
     Added Dbsets of Owners and Pets entities in the context.
     Implemented Required methods for implememting DbContext interface.
 
+Build 102 :
+    Added Context Interface (IPetRegoContext) and implemented required methods.
+
 */
 
 using System;
@@ -16,7 +19,7 @@ using System.Web;
 
 namespace PetRego.Models
 {
-    public class PetRegoContext : DbContext
+    public class PetRegoContext : DbContext, IPetRegoContext
     {
         //The Db connection string is configured in Web.config with name PetRegoContext.
         //Change the connection string under the name PetRegoContext to connect to the new database. 
@@ -27,5 +30,15 @@ namespace PetRego.Models
 
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Pet> Pets { get; set; }
+
+        public void MarkOwnerAsModified(Owner item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
+
+        public void MarkPetAsModified(Pet item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
     }
 }

@@ -5,6 +5,10 @@ Contains OwnersController class with method definitions for CRUD operations.
 Build 101 :
     Added Methods for CRUD operations which accepts and provides Owner Entity.
 
+Build 102 :
+    Added contructor with Context interface parameter to allow Dependency injection for Context class.
+    Removed Controller's dependency on Entity Framework.
+
 
 */
 
@@ -24,7 +28,15 @@ namespace PetRego.Controllers
 {
     public class OwnersController : ApiController
     {
-        private PetRegoContext db = new PetRegoContext();
+        private IPetRegoContext db = new PetRegoContext();
+
+        public OwnersController() { }
+
+        //Constructor based Dependency Injection
+        public OwnersController(IPetRegoContext context)
+        {
+            db = context;
+        }
 
         // GET: api/Owners
         public IQueryable<Owner> GetOwners()
@@ -59,7 +71,8 @@ namespace PetRego.Controllers
                 return BadRequest();
             }
 
-            db.Entry(owner).State = EntityState.Modified;
+            //Build 102 - calling the method from Context removing Controller's dependency on Entity Framework.
+            db.MarkOwnerAsModified(owner);
 
             try
             {
