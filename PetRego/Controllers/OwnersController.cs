@@ -14,6 +14,9 @@ Build 103 :
     Changes the Response in Type of OwnerDTO instead of Owner. Allows Response to contain HATEOAS links
     Added Unit Testing in Tests package to perform unit testing.
 
+Build 104 :
+    Added Unity Container Package to register Owner service interface with Owner service class. The configuration is added in WebApiConfig.
+    Provides complete independency. i.e. owner Controller is completely independent of owner Service class implementation.
 
 */
 
@@ -34,7 +37,7 @@ namespace PetRego.Controllers
 {
     public class OwnersController : ApiController
     {
-        private IOwnerService ownerservice = new OwnerService();
+        private IOwnerService ownerservice;
 
         public OwnersController() { }
 
