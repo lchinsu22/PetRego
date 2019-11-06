@@ -18,6 +18,9 @@ Build 104 :
     Added Unity Container Package to register Owner service interface with Owner service class. The configuration is added in WebApiConfig.
     Provides complete independency. i.e. owner Controller is completely independent of owner Service class implementation.
 
+Build 105 :
+    Added condition in post method to achieve idempotency.
+    Improved Exception Handling.
 */
 
 using System;
@@ -81,9 +84,10 @@ namespace PetRego.Controllers
 
             if (id != owner.OwnerId)
             {
-                return BadRequest();
+                return BadRequest("Owner Id in the body does not match the Owner ID in url");
             }
-            if (!ownerservice.OwnerExists(id))
+            if (!ownerservice.OwnerExists(owner.OwnerId))
+            //if (!ownerservice.OwnerExistsForPut(owner))
             {
                 return NotFound();
             }
@@ -93,16 +97,13 @@ namespace PetRego.Controllers
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
                 ownerdto = ownerservice.Update(owner, url);
             }
-            catch (DbUpdateConcurrencyException)
+            catch(DbUpdateConcurrencyException e)
             {
-                if (!ownerservice.OwnerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    return InternalServerError();
-                }
+                return BadRequest("The Pet Ids do not belong to the user.");
+            }
+            catch (Exception e)
+            {
+                    return InternalServerError(e);
             }
 
             return Ok(ownerdto);
@@ -116,6 +117,10 @@ namespace PetRego.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (ownerservice.OwnerExists(owner))
+            {
+                return BadRequest("Owner already Exist");
             }
             OwnerDTO ownerdto = new OwnerDTO();
             try

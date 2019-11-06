@@ -55,14 +55,17 @@ namespace PetRego.Models
             this.OwnerId = owner.OwnerId;
             this.Ownername = owner.Ownername;
             this.Pets = new List<PetDTO>();
-            foreach (Pet pet in owner.Pets)
+            if(owner.Pets != null)
             {
-                this.Pets.Add(new PetDTO(pet, Url));
+                foreach (Pet pet in owner.Pets)
+                {
+                    this.Pets.Add(new PetDTO(pet, Url));
+                }
             }
             Links = getOwnerLinks(Url + this.OwnerUrl + owner.OwnerId);
         }
 
-        public static List<Link> getOwnerLinks(string uri)
+        private static List<Link> getOwnerLinks(string uri)
         {
             List<Link> links = new List<Link>();
             links.Add(new Link(uri, "self", "GET"));

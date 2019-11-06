@@ -11,6 +11,9 @@ Build 104 :
     Added Unity Container Package to register Pet service interface with Pet service class. The configuration is added in WebApiConfig.
     Provides complete independency. i.e. Pet Controller is completely independent of pet class implementation.
 
+Build 105 :
+    Added condition in post method to achieve idempotency.
+    Improved Exception Handling.
 */
 
 using System;
@@ -86,9 +89,9 @@ namespace PetRego.Controllers
 
             if (id != pet.PetId)
             {
-                return BadRequest();
+                return BadRequest("Pet Id in the body does not match the Pet ID in url");
             }
-            if (!petservice.PetExists(id))
+            if (!petservice.PetExists(pet))
             {
                 return NotFound();
             }
@@ -122,6 +125,15 @@ namespace PetRego.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            //Build 105 - Condition to maintain POST idempotence
+            if (petservice.PetExists(pet))
+            {
+                return BadRequest("Pet already Exist");
+            }
+            if (pet.OwnerId == 0)
+            {
+                return BadRequest("Owner Id is required.");
             }
             PetDTO petdto = new PetDTO();
             try
