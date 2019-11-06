@@ -10,6 +10,7 @@ using PetRego.Service;
 using PetRego.Models;
 using Unity.Lifetime;
 using PetRego.App_Start;
+using PetRego.Controllers;
 
 namespace PetRego
 {

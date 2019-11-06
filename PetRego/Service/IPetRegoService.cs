@@ -5,6 +5,8 @@ Build 103 :
     Added Service classes definition.
     Suggestion For Future Build - Could use Genrics to simplify implementation of repetitive definitions.
 
+Build 105 :
+    Added Definition for OwnerExists and PetExists method for checking existing owner and pet entity.
 */
 
 using PetRego.Models;
@@ -25,6 +27,8 @@ namespace PetRego.Service
         OwnerDTO Update(Owner owner, string url);
         void Remove(Owner owner);
         bool OwnerExists(int id);
+        bool OwnerExists(Owner owner);
+        bool OwnerExistsForPut(Owner owner);
         void Dispose();
     }
 
@@ -38,6 +42,7 @@ namespace PetRego.Service
         PetDTO Update(Pet pet, string url);
         void Remove(Pet pet);
         bool PetExists(int id);
+        bool PetExists(Pet pet);
         void Dispose();
     }
 

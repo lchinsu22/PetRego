@@ -1,16 +1,19 @@
 ﻿/*
-provides implementation of Service classes providing budiness logic in handling requests.
+provides implementation of Service classes providing business logic in handling requests.
 
 Build 103 :
     Added Service method implementations.
     Suggestion For Future Build - Could use Genrics to simplify implementation of repetitive implementations.
 
+Build 105 :
+    Added OwnerExists and PetExists method for checking existing owner and pet entity.
 */
 
 using PetRego.Models;
 using PetRegoSample.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -56,6 +59,10 @@ namespace PetRego.Service
         public OwnerDTO Update(Owner owner, string url)
         {
             db.MarkAsModified(owner);
+            foreach(Pet pet in owner.Pets)
+            {
+                db.MarkAsModified(pet);
+            }
             db.SaveChanges();
             return Mapper.MapToOwnerDTO(owner, url);
         }
@@ -69,6 +76,40 @@ namespace PetRego.Service
         public bool OwnerExists(int id)
         {
             return db.Owners.Count(e => e.OwnerId == id) > 0;
+        }
+
+        public bool OwnerExistsForPut(Owner owner)
+        {
+            Owner dbowner = db.Owners.FirstOrDefault(p => p.OwnerId == owner.OwnerId);
+            if (dbowner == null)
+                return false;
+
+            foreach (Pet pet in owner.Pets)
+            {
+                //Debug.WriteLine("retrieved owner - " + own.ToString());
+                if (!dbowner.Pets.Any(x => x.PetId == pet.PetId))
+                {
+                    Debug.WriteLine("Equal to input Owner");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool OwnerExists(Owner owner)
+        {
+            List<Owner> owners = db.Owners.Where(ow => ow.Ownername.Equals(owner.Ownername)).ToList();
+            //Debug.WriteLine("input owner - " + owner.ToString());
+            foreach(Owner own in owners)
+            {
+                //Debug.WriteLine("retrieved owner - " + own.ToString());
+                if (own.Equals(owner))
+                {
+                    Debug.WriteLine("Equal to input Owner");
+                    return true;
+                }
+            }
+            return false;
         }
 
         protected void Dispose(bool disposing)
@@ -150,6 +191,19 @@ namespace PetRego.Service
         public bool PetExists(int id)
         {
             return db.Pets.Count(e => e.PetId == id) > 0;
+        }
+
+        public bool PetExists(Pet pet)
+        {
+            List<Pet> pets = db.Pets.Where(p => p.PetName == pet.PetName).ToList();
+            foreach (Pet pt in pets)
+            {
+                if (pt.Equals(pet))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         protected void Dispose(bool disposing)

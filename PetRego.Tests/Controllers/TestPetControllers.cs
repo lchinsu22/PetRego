@@ -7,6 +7,9 @@ Used Mock database context with getPetRegoContext and getDemoPet methods for sam
 Build 103 :
     Added test methods to test all the Pet entity Controller methods.
 
+Build 105 :
+    Changed BadRequest check to BadRequestErrorMessage Check.
+    Added method to check idempotency in post request
 */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -82,7 +85,8 @@ namespace PetRego.Tests.Controllers
             var controller = new PetsController(new PetService(new TestPetRegoContext()));
 
             var badresult = controller.PutPet(999, GetDemoPet());
-            Assert.IsInstanceOfType(badresult, typeof(BadRequestResult));
+            //Build 105 - Changed BadRequest check to BadRequestErrorMessage Check.
+            Assert.IsInstanceOfType(badresult, typeof(BadRequestErrorMessageResult));
         }
 
         [TestMethod]
@@ -141,6 +145,41 @@ namespace PetRego.Tests.Controllers
 
             Assert.IsNotNull(result);
             Assert.AreEqual(item.PetId, result.Content.PetId);
+        }
+
+        [TestMethod]
+        public void PostPet_CheckIdempotency()
+        {
+            Pet pet1 = new Pet() { PetId = 1, PetName = "Demo Pet 1", PetType = "Demo Type 1", OwnerId = 1 };
+            Pet pet2 = new Pet() { PetId = 2, PetName = "Demo Pet 2", PetType = "Demo Type 2", OwnerId = 2 };
+            var context = new TestPetRegoContext();
+            context.Pets.Add(pet1);
+            context.Pets.Add(pet2);
+            var service = new PetService(context);
+
+            Pet pet3 = new Pet() { PetName = "Demo Pet 2", PetType = "Demo Type 2" };
+            bool result = service.PetExists(pet3);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(true, result);
+
+            var controller = new PetsController(new PetService(context));
+
+            controller.Request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("http://localhost/api/Pets")
+            };
+            controller.Configuration = new HttpConfiguration();
+            controller.Configuration.Routes.MapHttpRoute(
+                name: "CreatePets",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional });
+
+            var controllerresult =
+                controller.PostPet(pet3) as IHttpActionResult;
+
+            Assert.IsNotNull(controllerresult);
+            Assert.IsInstanceOfType(controllerresult, typeof(BadRequestErrorMessageResult));
         }
 
         Pet GetDemoPet()
