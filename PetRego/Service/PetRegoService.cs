@@ -7,6 +7,10 @@ Build 103 :
 
 Build 105 :
     Added OwnerExists and PetExists method for checking existing owner and pet entity.
+
+Build 201 : 
+    Converted the services to generic type and implemented generic interface method definitions 
+    so as to accomadate various version of petDTO entity that has implemented IpetDTO interface.
 */
 
 using PetRego.Models;
@@ -19,7 +23,7 @@ using System.Web;
 
 namespace PetRego.Service
 {
-    public class OwnerService : IDisposable, IOwnerService
+    public class OwnerService<T> : IDisposable, IOwnerService<T>
     {
         private IPetRegoContext db;
 
@@ -30,18 +34,18 @@ namespace PetRego.Service
             db = context;
         }
 
-        public IQueryable<OwnerDTO> GetAll(string url)
+        public IQueryable<OwnerDTO<T>> GetAll(string url, IPetDTO<T> Ipetdto)
         {
 
-            List<OwnerDTO> ownerdtos = Mapper.MapTOOwnerDTOs(db.Owners.ToList(), url);
+            List<OwnerDTO<T>> ownerdtos = Mapper<T>.MapTOOwnerDTOs(db.Owners.ToList(), url, Ipetdto);
             return ownerdtos.AsQueryable();
         }
 
-        public OwnerDTO GetDTOByID(int id, string url)
+        public OwnerDTO<T> GetDTOByID(int id, string url, IPetDTO<T> Ipetdto)
         {
 
             Owner owner = db.Owners.FirstOrDefault(p => p.OwnerId == id);
-            return Mapper.MapToOwnerDTO(owner, url);
+            return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
         }
 
         public Owner GetByID(int id)
@@ -49,14 +53,14 @@ namespace PetRego.Service
             return db.Owners.FirstOrDefault(p => p.OwnerId == id);
         }
 
-        public OwnerDTO Add(Owner owner, string url)
+        public OwnerDTO<T> Add(Owner owner, string url, IPetDTO<T> Ipetdto)
         {
             db.Owners.Add(owner);
             db.SaveChanges();
-            return Mapper.MapToOwnerDTO(owner, url);
+            return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
         }
 
-        public OwnerDTO Update(Owner owner, string url)
+        public OwnerDTO<T> Update(Owner owner, string url, IPetDTO<T> Ipetdto)
         {
             db.MarkAsModified(owner);
             foreach(Pet pet in owner.Pets)
@@ -64,7 +68,7 @@ namespace PetRego.Service
                 db.MarkAsModified(pet);
             }
             db.SaveChanges();
-            return Mapper.MapToOwnerDTO(owner, url);
+            return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
         }
 
         public void Remove(Owner owner)
@@ -90,6 +94,10 @@ namespace PetRego.Service
                 if (!dbowner.Pets.Any(x => x.PetId == pet.PetId))
                 {
                     Debug.WriteLine("Equal to input Owner");
+                    return false;
+                }
+                if(pet.OwnerId != owner.OwnerId)
+                {
                     return false;
                 }
             }
@@ -132,7 +140,7 @@ namespace PetRego.Service
 
     }
 
-    public class PetService : IDisposable, IPetService
+    public class PetService<T> : IDisposable, IPetService<T>
     {
         private IPetRegoContext db;
 
@@ -143,24 +151,31 @@ namespace PetRego.Service
             db = context;
         }
 
-        public IQueryable<PetDTO> GetAll(string url)
+        public IQueryable<T> GetAll(string url, IPetDTO<T> Ipetdto)
         {
 
-            List<PetDTO> petdtos = Mapper.MapToPetDTOs(db.Pets.ToList(), url);
+            List<T> petdtos = Mapper<T>.MapToPetDTOs(db.Pets.ToList(), url, Ipetdto);
             return petdtos.AsQueryable();
         }
 
-        public IQueryable<PetDTO> GetPetsByOwnerId(int OwnerId, string url)
+        public IQueryable<T> GetPetsByOwnerId(int OwnerId, string url, IPetDTO<T> Ipetdto)
         {
             List<Pet> pets = db.Pets.Where(p => p.OwnerId == OwnerId).ToList();
-            List<PetDTO> petdtos = Mapper.MapToPetDTOs(pets, url);
+            List<T> petdtos = Mapper<T>.MapToPetDTOs(pets, url, Ipetdto);
             return petdtos.AsQueryable();
         }
 
-        public PetDTO GetDTOByID(int id, string url)
+        public T GetDTOByID(int id, string url, IPetDTO<T> Ipetdto)
         {
-            Pet pet = db.Pets.FirstOrDefault(p => p.OwnerId == id);
-            return Mapper.MapToPetDTO(pet, url);
+            Pet pet = db.Pets.FirstOrDefault(p => p.PetId == id);
+            if (pet != null)
+            {
+                return Mapper<T>.MapToPetDTO(pet, url, Ipetdto);
+            }else
+            {
+                return default(T);
+            }
+            
         }
 
         public Pet GetByID(int id)
@@ -168,18 +183,18 @@ namespace PetRego.Service
             return db.Pets.FirstOrDefault(p => p.PetId == id);
         }
 
-        public PetDTO Add(Pet pet, string url)
+        public T Add(Pet pet, string url, IPetDTO<T> Ipetdto)
         {
             db.Pets.Add(pet);
             db.SaveChanges();
-            return Mapper.MapToPetDTO(pet, url);
+            return Mapper<T>.MapToPetDTO(pet, url, Ipetdto);
         }
 
-        public PetDTO Update(Pet pet, string url)
+        public T Update(Pet pet, string url, IPetDTO<T> Ipetdto)
         {
             db.MarkAsModified(pet);
             db.SaveChanges();
-            return Mapper.MapToPetDTO(pet, url);
+            return Mapper<T>.MapToPetDTO(pet, url, Ipetdto);
         }
 
         public void Remove(Pet pet)

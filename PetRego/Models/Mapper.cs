@@ -9,6 +9,9 @@ Build 103 :
     Added methods to convert List of Pets to List of PetDTOs.
     Suggestion For Future Build - Could use Genrics to simplify implementation of repetitive methods.
 
+Build 201 : 
+    Converted mapper to a generic type and changed the mapping methods with generic type paramater and return type 
+    so as to accomadate various version of petDTO entity that has implemented IpetDTO interface.
 */
 
 using PetRego.Models;
@@ -19,34 +22,50 @@ using System.Web;
 
 namespace PetRegoSample.Models
 {
-    public static class Mapper
+    public static class Mapper<T>
     {
-        public static OwnerDTO MapToOwnerDTO(Owner owner, string url)
+
+        public static OwnerDTO<T> MapToOwnerDTO(Owner owner, string url, IPetDTO<T> Ipetdto)
         {
-            return new OwnerDTO(owner, url);
+            return new OwnerDTO<T>(owner, url, Ipetdto);
         }
 
-        public static List<OwnerDTO> MapTOOwnerDTOs(List<Owner> owners, string url)
+        public static List<OwnerDTO<T>> MapTOOwnerDTOs(List<Owner> owners, string url, IPetDTO<T> Ipetdto)
         {
-            List<OwnerDTO> ownerdtos = new List<OwnerDTO>();
+            List<OwnerDTO<T>> ownerdtos = new List<OwnerDTO<T>>();
             foreach (Owner owner in owners)
             {
-                ownerdtos.Add(MapToOwnerDTO(owner, url));
+                ownerdtos.Add(MapToOwnerDTO(owner, url, Ipetdto));
             }
             return ownerdtos;
         }
 
-        public static PetDTO MapToPetDTO(Pet pet, string url)
+        public static T MapToPetDTO(Pet pet, string url, IPetDTO<T> Ipetdto)
         {
-            return new PetDTO(pet, url); ;
+            return Ipetdto.getDTO(pet, url);
         }
 
-        public static List<PetDTO> MapToPetDTOs(List<Pet> pets, string url)
+        public static List<T> MapToPetDTOs(List<Pet> pets, string url, IPetDTO<T> Ipetdto)
         {
-            List<PetDTO> petdtos = new List<PetDTO>();
+            List<T> petdtos = new List<T>();
             foreach (Pet pet in pets)
             {
-                petdtos.Add(MapToPetDTO(pet, url));
+                petdtos.Add(MapToPetDTO(pet, url, Ipetdto));
+            }
+            return petdtos;
+        }
+
+        public static PetV2DTO MapToPetV2DTO(Pet pet, string url)
+        {
+            return new PetV2DTO(pet, url); ;
+        }
+
+        public static List<PetV2DTO> MapToPetV2DTOs(List<Pet> pets, string url)
+        {
+            List<PetV2DTO> petdtos = new List<PetV2DTO>();
+            foreach (Pet pet in pets)
+            {
+                petdtos.Add(MapToPetV2DTO(pet, url));
             }
             return petdtos;
         }

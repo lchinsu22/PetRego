@@ -9,6 +9,9 @@ Build 103 :
 
 Build 105 :
     Changed BadRequest check to BadRequestErrorMessage Check.
+
+Build 201 : 
+    Added PetDTO as generic parameter to service objects to implement the generic service class.
 */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,7 +34,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PostOwner_ShouldReturnSameOwner()
         {
-            var controller = new OwnersController(new OwnerService(new TestPetRegoContext()));
+            var controller = new OwnersController(new OwnerService<PetDTO>(new TestPetRegoContext()));
 
             controller.Request = new HttpRequestMessage
             {
@@ -46,7 +49,7 @@ namespace PetRego.Tests.Controllers
             Owner item = GetDemoOwner();
 
             var result =
-                controller.PostOwner(item) as CreatedNegotiatedContentResult<OwnerDTO>;
+                controller.PostOwner(item) as CreatedNegotiatedContentResult<OwnerDTO<PetDTO>>;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(result.Content.Ownername, item.Ownername);
@@ -56,7 +59,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PutOwner_ShouldReturnNotFound()
         {
-            var controller = new OwnersController(new OwnerService(new TestPetRegoContext()));
+            var controller = new OwnersController(new OwnerService<PetDTO>(new TestPetRegoContext()));
             controller.Request = new HttpRequestMessage
             {
                 RequestUri = new Uri("http://localhost/api/Owners/{id}")
@@ -77,7 +80,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PutOwner_ShouldFail_WhenDifferentID()
         {
-            var controller = new OwnersController(new OwnerService(new TestPetRegoContext()));
+            var controller = new OwnersController(new OwnerService<PetDTO>(new TestPetRegoContext()));
 
             var badresult = controller.PutOwner(999, GetDemoOwner());
             //Build 105 - Changed BadRequest check to BadRequestErrorMessage Check.
@@ -90,7 +93,7 @@ namespace PetRego.Tests.Controllers
             var context = new TestPetRegoContext();
             context.Owners.Add(GetDemoOwner());
 
-            var controller = new OwnersController(new OwnerService(context));
+            var controller = new OwnersController(new OwnerService<PetDTO>(context));
             controller.Request = new HttpRequestMessage
             {
                 RequestUri = new Uri("http://localhost/api/Owners/{id}")
@@ -101,7 +104,7 @@ namespace PetRego.Tests.Controllers
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional });
 
-            var result = controller.GetOwner(1) as OkNegotiatedContentResult<OwnerDTO>;
+            var result = controller.GetOwner(1) as OkNegotiatedContentResult<OwnerDTO<PetDTO>>;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Content.OwnerId);
@@ -110,7 +113,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void GetOwners_ShouldReturnAllOwners()
         {
-            var controller = new OwnersController(new OwnerService(getPetRegoContext()));
+            var controller = new OwnersController(new OwnerService<PetDTO>(getPetRegoContext()));
 
             controller.Request = new HttpRequestMessage
             {
@@ -122,7 +125,7 @@ namespace PetRego.Tests.Controllers
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional });
 
-            var result = controller.GetOwners() as IQueryable<OwnerDTO>;
+            var result = controller.GetOwners() as IQueryable<OwnerDTO<PetDTO>>;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(3, result.Count());
@@ -135,7 +138,7 @@ namespace PetRego.Tests.Controllers
             var item = GetDemoOwner();
             context.Owners.Add(item);
 
-            var controller = new OwnersController(new OwnerService(context));
+            var controller = new OwnersController(new OwnerService<PetDTO>(context));
             var result = controller.DeleteOwner(1) as OkNegotiatedContentResult<Owner>;
 
             Assert.IsNotNull(result);
@@ -146,7 +149,7 @@ namespace PetRego.Tests.Controllers
         public void PostOwner_CheckIdempotency()
         {
             
-            var service = new OwnerService(getPetRegoContext());
+            var service = new OwnerService<PetDTO>(getPetRegoContext());
 
             
             bool result = service.OwnerExists(GetDemoOwner());
@@ -154,7 +157,7 @@ namespace PetRego.Tests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(true, result);
 
-            var controller = new OwnersController(new OwnerService(getPetRegoContext()));
+            var controller = new OwnersController(new OwnerService<PetDTO>(getPetRegoContext()));
 
             controller.Request = new HttpRequestMessage
             {

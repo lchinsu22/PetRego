@@ -254,6 +254,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201911051302102_InitialCreate.cs" />
+    <Compile Include="Migrations\201911051302102_InitialCreate.Designer.cs">
+      <DependentUpon>201911051302102_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201911070456532_AddPetFood.cs" />
+    <Compile Include="Migrations\201911070456532_AddPetFood.Designer.cs">
+      <DependentUpon>201911070456532_AddPetFood.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -339,6 +348,14 @@
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201911051302102_InitialCreate.resx">
+      <DependentUpon>201911051302102_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201911070456532_AddPetFood.resx">
+      <DependentUpon>201911070456532_AddPetFood.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
