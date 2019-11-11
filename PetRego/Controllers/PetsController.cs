@@ -14,6 +14,9 @@ Build 104 :
 Build 105 :
     Added condition in post method to achieve idempotency.
     Improved Exception Handling.
+
+Build 201 :
+    Added petDTO as generic parameter to implement generic Pet service class.
 */
 
 using System;
@@ -33,13 +36,15 @@ namespace PetRego.Controllers
 {
     public class PetsController : ApiController
     {
-        private IPetService petservice;
+        private IPetService<PetDTO> petservice;
+        private PetDTO petDTO = new PetDTO();
 
         public PetsController() { }
 
-        public PetsController(IPetService _petservice)
+        public PetsController(IPetService<PetDTO> _petservice)
         {
             this.petservice = _petservice;
+            this.petDTO = new PetDTO();
         }
 
         // GET: api/Pets
@@ -48,7 +53,7 @@ namespace PetRego.Controllers
         {
             string url = Url.Link("GetPets", null);
             url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<PetDTO> petdtos = petservice.GetAll(url);
+            IQueryable<PetDTO> petdtos = petservice.GetAll(url, petDTO);
             return petdtos;
         }
 
@@ -58,7 +63,7 @@ namespace PetRego.Controllers
         {
             string url = Url.Link("GetPetById", id);
             url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<PetDTO> petdtos = petservice.GetPetsByOwnerId(id, url);
+            IQueryable<PetDTO> petdtos = petservice.GetPetsByOwnerId(id, url, petDTO);
             return petdtos;
         }
 
@@ -69,7 +74,7 @@ namespace PetRego.Controllers
         {
             string url = Url.Link("GetPetById", id);
             url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            PetDTO petdto = petservice.GetDTOByID(id, url);
+            PetDTO petdto = petservice.GetDTOByID(id, url, petDTO);
             if (petdto == null)
             {
                 return NotFound();
@@ -100,7 +105,7 @@ namespace PetRego.Controllers
             {
                 string url = Url.Link("UpdatePets", id);
                 url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                petdto = petservice.Update(pet, url);
+                petdto = petservice.Update(pet, url, petDTO);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -140,7 +145,7 @@ namespace PetRego.Controllers
             {
                 string url = Url.Link("CreatePets", petdto.PetId) + "/" + petdto.PetId;
                 url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                petdto = petservice.Add(pet, url);
+                petdto = petservice.Add(pet, url, petDTO);
             }
             catch (Exception e)
             {

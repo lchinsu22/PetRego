@@ -21,6 +21,9 @@ Build 104 :
 Build 105 :
     Added condition in post method to achieve idempotency.
     Improved Exception Handling.
+
+Build 201 :
+    Added petDTO as generic parameter to implement generic Owner service class.
 */
 
 using System;
@@ -40,31 +43,33 @@ namespace PetRego.Controllers
 {
     public class OwnersController : ApiController
     {
-        private IOwnerService ownerservice;
+        private IOwnerService<PetDTO> ownerservice;
 
         public OwnersController() { }
+        private PetDTO petDTO = new PetDTO();
 
-        public OwnersController(IOwnerService _ownerservice)
+        public OwnersController(IOwnerService<PetDTO> _ownerservice)
         {
             this.ownerservice = _ownerservice;
+            this.petDTO = new PetDTO();
         }
 
         // GET: api/Owners
         [Route("api/Owners", Name = "GetOwners")]
-        public IQueryable<OwnerDTO> GetOwners()
+        public IQueryable<OwnerDTO<PetDTO>> GetOwners()
         {
             string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<OwnerDTO> ownerdtos = ownerservice.GetAll(url);
+            IQueryable<OwnerDTO<PetDTO>> ownerdtos = ownerservice.GetAll(url, petDTO);
             return ownerdtos;
         }
 
         // GET: api/Owners/5
         [Route("api/Owners/{id}", Name = "GetOwnerById")]
-        [ResponseType(typeof(OwnerDTO))]
+        [ResponseType(typeof(OwnerDTO<PetDTO>))]
         public IHttpActionResult GetOwner(int id)
         {
             string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            OwnerDTO ownerdto = ownerservice.GetDTOByID(id, url);
+            OwnerDTO<PetDTO> ownerdto = ownerservice.GetDTOByID(id, url, petDTO);
             if (ownerdto == null)
             {
                 return NotFound();
@@ -74,7 +79,7 @@ namespace PetRego.Controllers
 
         // PUT: api/Owners/5
         [Route("api/Owners/{id}", Name = "UpdateOwners")]
-        [ResponseType(typeof(OwnerDTO))]
+        [ResponseType(typeof(OwnerDTO<PetDTO>))]
         public IHttpActionResult PutOwner(int id, Owner owner)
         {
             if (!ModelState.IsValid)
@@ -91,11 +96,11 @@ namespace PetRego.Controllers
             {
                 return NotFound();
             }
-            OwnerDTO ownerdto = new OwnerDTO();
+            OwnerDTO<PetDTO> ownerdto = new OwnerDTO<PetDTO>(new PetDTO());
             try
             {
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                ownerdto = ownerservice.Update(owner, url);
+                ownerdto = ownerservice.Update(owner, url, petDTO);
             }
             catch(DbUpdateConcurrencyException e)
             {
@@ -111,7 +116,7 @@ namespace PetRego.Controllers
 
         // POST: api/Owners
         [Route("api/Owners", Name = "CreateOwners")]
-        [ResponseType(typeof(OwnerDTO))]
+        [ResponseType(typeof(OwnerDTO<PetDTO>))]
         public IHttpActionResult PostOwner(Owner owner)
         {
             if (!ModelState.IsValid)
@@ -122,11 +127,11 @@ namespace PetRego.Controllers
             {
                 return BadRequest("Owner already Exist");
             }
-            OwnerDTO ownerdto = new OwnerDTO();
+            OwnerDTO<PetDTO> ownerdto = new OwnerDTO<PetDTO>(new PetDTO());
             try
             {
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                ownerdto = ownerservice.Add(owner, url);
+                ownerdto = ownerservice.Add(owner, url, petDTO);
             }
             catch (Exception e)
             {

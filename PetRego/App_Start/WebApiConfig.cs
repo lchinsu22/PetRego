@@ -21,9 +21,13 @@ namespace PetRego
             
             //Build 104 - Configuration to register interface to respective classes in Unity Container to facilitate Dependency Injection. 
             var container = new UnityContainer();
-            container.RegisterType<IOwnerService, OwnerService>(new HierarchicalLifetimeManager());
+            //Build 201 - Added petDTO as generic paramter to register service interface against its class with same petDTO type. 
+            container.RegisterType<IOwnerService<PetDTO>, OwnerService<PetDTO>>(new HierarchicalLifetimeManager());
+            container.RegisterType<IPetService<PetDTO>, PetService<PetDTO>>(new HierarchicalLifetimeManager());
+
             container.RegisterType<IPetRegoContext, PetRegoContext>(new HierarchicalLifetimeManager());
-            container.RegisterType<IPetService, PetService>(new HierarchicalLifetimeManager());
+            container.RegisterType<IPetDTO<PetDTO>, PetDTO > (new HierarchicalLifetimeManager());
+            container.RegisterType<IPetDTO<PetV2DTO>, PetV2DTO>(new HierarchicalLifetimeManager());
             config.DependencyResolver = new UnityResolver(container);
 
             // Web API configuration and services

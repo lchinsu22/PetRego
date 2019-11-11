@@ -10,6 +10,9 @@ Build 103 :
 Build 105 :
     Changed BadRequest check to BadRequestErrorMessage Check.
     Added method to check idempotency in post request
+
+Build 201 : 
+    Added PetDTO as generic parameter to service objects to implement the generic service class.
 */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -35,7 +38,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PostPet_ShouldReturnSamePet()
         {
-            var controller = new PetsController(new PetService(new TestPetRegoContext()));
+            var controller = new PetsController(new PetService<PetDTO>(new TestPetRegoContext()));
 
             controller.Request = new HttpRequestMessage
             {
@@ -61,7 +64,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PutPet_ShouldReturnNotFound()
         {
-            var controller = new PetsController(new PetService(new TestPetRegoContext()));
+            var controller = new PetsController(new PetService<PetDTO>(new TestPetRegoContext()));
             controller.Request = new HttpRequestMessage
             {
                 RequestUri = new Uri("http://localhost/api/Pets/{id}")
@@ -82,7 +85,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void PutPet_ShouldFail_WhenDifferentID()
         {
-            var controller = new PetsController(new PetService(new TestPetRegoContext()));
+            var controller = new PetsController(new PetService<PetDTO>(new TestPetRegoContext()));
 
             var badresult = controller.PutPet(999, GetDemoPet());
             //Build 105 - Changed BadRequest check to BadRequestErrorMessage Check.
@@ -95,7 +98,7 @@ namespace PetRego.Tests.Controllers
             var context = new TestPetRegoContext();
             context.Pets.Add(GetDemoPet());
 
-            var controller = new PetsController(new PetService(context));
+            var controller = new PetsController(new PetService<PetDTO>(context));
             controller.Request = new HttpRequestMessage
             {
                 RequestUri = new Uri("http://localhost/api/Pets/{id}")
@@ -115,7 +118,7 @@ namespace PetRego.Tests.Controllers
         [TestMethod]
         public void GetPets_ShouldReturnAllPets()
         {
-            var controller = new PetsController(new PetService(getPetRegoContext()));
+            var controller = new PetsController(new PetService<PetDTO>(getPetRegoContext()));
 
             controller.Request = new HttpRequestMessage
             {
@@ -140,7 +143,7 @@ namespace PetRego.Tests.Controllers
             var item = GetDemoPet();
             context.Pets.Add(item);
 
-            var controller = new PetsController(new PetService(context));
+            var controller = new PetsController(new PetService<PetDTO>(context));
             var result = controller.DeletePet(3) as OkNegotiatedContentResult<Pet>;
 
             Assert.IsNotNull(result);
@@ -155,7 +158,7 @@ namespace PetRego.Tests.Controllers
             var context = new TestPetRegoContext();
             context.Pets.Add(pet1);
             context.Pets.Add(pet2);
-            var service = new PetService(context);
+            var service = new PetService<PetDTO>(context);
 
             Pet pet3 = new Pet() { PetName = "Demo Pet 2", PetType = "Demo Type 2" };
             bool result = service.PetExists(pet3);
@@ -163,7 +166,7 @@ namespace PetRego.Tests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(true, result);
 
-            var controller = new PetsController(new PetService(context));
+            var controller = new PetsController(new PetService<PetDTO>(context));
 
             controller.Request = new HttpRequestMessage
             {

@@ -8,6 +8,15 @@ Build 101 :
 
 Build 105 :
     Added Override Equals method to compare two Owners or Pets Entities.
+
+Build 201 :
+    Added the field "PetFood" in Pet Model to accomadate second version of the application.
+    Entity framework Code first migration is used to update the database. 
+    Commands used in Package Manager Console are :
+        Enable-Migrations -ContextTypeName PetRego.Models.PetRegoContext
+        Add-Migration AddPetFood
+        Update-Database
+        
 */
 
 using Newtonsoft.Json;
@@ -15,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PetRego.Models
 {
@@ -29,17 +39,16 @@ namespace PetRego.Models
 
         public virtual List<Pet> Pets { get; set; }
 
-        public override bool Equals(Object obj)
+        public bool Equals(Owner owner)
         {
                         
-            if (obj == null)
+            if (owner == null)
             {
                 Debug.WriteLine("Object is null");
                 return false;
             }
             else
             {
-                Owner owner = (Owner)obj;
                 /*
                 if ( (this.OwnerId != 0 && owner.OwnerId != 0)  &&  (this.OwnerId != owner.OwnerId) ){
                     return false;
@@ -78,14 +87,14 @@ namespace PetRego.Models
 
             foreach (Pet pet1 in pets1)
             {
-                if(!pets2.Contains(pet1)){
+                if(!pets2.Any(x => x.Equals(pet1))){
                     Debug.WriteLine("Pets2 does not contain pet1 - " + pet1.ToString());
                     return false;
                 }
             }
             foreach (Pet pet2 in pets2)
             {
-                if (!pets1.Contains(pet2))
+                if (!pets1.Any(x => x.Equals(pet2)))
                 {
                     Debug.WriteLine("Pets1 does not contain pet2 - " + pet2.ToString());
                     return false;
@@ -119,6 +128,10 @@ namespace PetRego.Models
         [Display(Name = "PetType")]
         public string PetType { get; set; }
 
+        [StringLength(50, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 2)]
+        [Display(Name = "PetFood")]
+        public string PetFood { get; set; }
+
         public int OwnerId { get; set; }
 
         //"JsonIgnore" data annotation allows the Model to be flattened and provide a required Json Response.
@@ -126,17 +139,16 @@ namespace PetRego.Models
         [JsonIgnore]
         public virtual Owner Owner { get; set; }
 
-        public override bool Equals(Object obj)
+        public bool Equals(Pet pet)
         {
 
-            if (obj == null)
+            if (pet == null)
             {
                 Debug.WriteLine("Object is null");
                 return false;
             }
             else
             {
-                Pet pet = (Pet)obj;
                 /*
                 if ((this.OwnerId != 0 && pet.OwnerId != 0) && (this.OwnerId != pet.OwnerId))
                 {

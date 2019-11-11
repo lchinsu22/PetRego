@@ -7,6 +7,10 @@ Build 103 :
 
 Build 105 :
     Added Definition for OwnerExists and PetExists method for checking existing owner and pet entity.
+
+Build 201 : 
+    Converted interface method definitions to a generic type so as to accomadate various version of petDTO entity 
+    that has implemented IpetDTO interface.
 */
 
 using PetRego.Models;
@@ -18,13 +22,13 @@ using System.Threading.Tasks;
 
 namespace PetRego.Service
 {
-    public interface IOwnerService
+    public interface IOwnerService<T>
     {
-        IQueryable<OwnerDTO> GetAll(string url);
-        OwnerDTO GetDTOByID(int id, string url);
+        IQueryable<OwnerDTO<T>> GetAll(string url, IPetDTO<T> Ipetdto);
+        OwnerDTO<T> GetDTOByID(int id, string url, IPetDTO<T> Ipetdto);
         Owner GetByID(int id);
-        OwnerDTO Add(Owner owner, string url);
-        OwnerDTO Update(Owner owner, string url);
+        OwnerDTO<T> Add(Owner owner, string url, IPetDTO<T> Ipetdto);
+        OwnerDTO<T> Update(Owner owner, string url, IPetDTO<T> Ipetdto);
         void Remove(Owner owner);
         bool OwnerExists(int id);
         bool OwnerExists(Owner owner);
@@ -32,14 +36,14 @@ namespace PetRego.Service
         void Dispose();
     }
 
-    public interface IPetService
+    public interface IPetService<T>
     {
-        IQueryable<PetDTO> GetAll(string url);
-        IQueryable<PetDTO> GetPetsByOwnerId(int OwnerId, string url);
-        PetDTO GetDTOByID(int id, string url);
+        IQueryable<T> GetAll(string url, IPetDTO<T> Ipetdto);
+        IQueryable<T> GetPetsByOwnerId(int OwnerId, string url, IPetDTO<T> Ipetdto);
+        T GetDTOByID(int id, string url, IPetDTO<T> Ipetdto);
         Pet GetByID(int id);
-        PetDTO Add(Pet pet, string url);
-        PetDTO Update(Pet pet, string url);
+        T Add(Pet pet, string url, IPetDTO<T> Ipetdto);
+        T Update(Pet pet, string url, IPetDTO<T> Ipetdto);
         void Remove(Pet pet);
         bool PetExists(int id);
         bool PetExists(Pet pet);
