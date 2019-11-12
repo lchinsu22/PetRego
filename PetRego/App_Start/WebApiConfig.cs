@@ -24,6 +24,8 @@ namespace PetRego
             //Build 201 - Added petDTO as generic paramter to register service interface against its class with same petDTO type. 
             container.RegisterType<IOwnerService<PetDTO>, OwnerService<PetDTO>>(new HierarchicalLifetimeManager());
             container.RegisterType<IPetService<PetDTO>, PetService<PetDTO>>(new HierarchicalLifetimeManager());
+            container.RegisterType<IOwnerService<PetV2DTO>, OwnerService<PetV2DTO>>(new HierarchicalLifetimeManager());
+            container.RegisterType<IPetService<PetV2DTO>, PetService<PetV2DTO>>(new HierarchicalLifetimeManager());
 
             container.RegisterType<IPetRegoContext, PetRegoContext>(new HierarchicalLifetimeManager());
             container.RegisterType<IPetDTO<PetDTO>, PetDTO > (new HierarchicalLifetimeManager());

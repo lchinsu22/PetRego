@@ -11,7 +11,12 @@ Build 105 :
 Build 201 : 
     Converted the services to generic type and implemented generic interface method definitions 
     so as to accomadate various version of petDTO entity that has implemented IpetDTO interface.
-*/
+
+Build 202:
+    Utilized the PetFoodMapper methods to set the Food Type of the Pet for any post or put request. 
+    It has to be noted that any update request on the pet that has been created with the first version 
+    of the application will have its Pet Food attribute updated.
+ */
 
 using PetRego.Models;
 using PetRegoSample.Models;
@@ -55,6 +60,7 @@ namespace PetRego.Service
 
         public OwnerDTO<T> Add(Owner owner, string url, IPetDTO<T> Ipetdto)
         {
+            owner = PetFoodMapper.setPetFood(owner);
             db.Owners.Add(owner);
             db.SaveChanges();
             return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
@@ -62,6 +68,7 @@ namespace PetRego.Service
 
         public OwnerDTO<T> Update(Owner owner, string url, IPetDTO<T> Ipetdto)
         {
+            owner = PetFoodMapper.setPetFood(owner);
             db.MarkAsModified(owner);
             foreach(Pet pet in owner.Pets)
             {
@@ -185,6 +192,7 @@ namespace PetRego.Service
 
         public T Add(Pet pet, string url, IPetDTO<T> Ipetdto)
         {
+            pet = PetFoodMapper.setPetFood(pet);
             db.Pets.Add(pet);
             db.SaveChanges();
             return Mapper<T>.MapToPetDTO(pet, url, Ipetdto);
@@ -192,6 +200,7 @@ namespace PetRego.Service
 
         public T Update(Pet pet, string url, IPetDTO<T> Ipetdto)
         {
+            pet = PetFoodMapper.setPetFood(pet);
             db.MarkAsModified(pet);
             db.SaveChanges();
             return Mapper<T>.MapToPetDTO(pet, url, Ipetdto);
@@ -238,6 +247,5 @@ namespace PetRego.Service
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
     }
 }

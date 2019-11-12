@@ -54,20 +54,5 @@ namespace PetRegoSample.Models
             }
             return petdtos;
         }
-
-        public static PetV2DTO MapToPetV2DTO(Pet pet, string url)
-        {
-            return new PetV2DTO(pet, url); ;
-        }
-
-        public static List<PetV2DTO> MapToPetV2DTOs(List<Pet> pets, string url)
-        {
-            List<PetV2DTO> petdtos = new List<PetV2DTO>();
-            foreach (Pet pet in pets)
-            {
-                petdtos.Add(MapToPetV2DTO(pet, url));
-            }
-            return petdtos;
-        }
     }
 }

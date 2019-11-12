@@ -170,7 +170,7 @@ namespace PetRego.Models
         //PetUrl specifies the Pets Route
         [JsonIgnore]
         public string PetUrl = "/api/Pets/";
-        PetV2DTO()
+        public PetV2DTO()
         {
             Links = new List<Link>();
         }

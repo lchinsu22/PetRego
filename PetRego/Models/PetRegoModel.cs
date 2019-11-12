@@ -180,6 +180,7 @@ namespace PetRego.Models
         {
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
+
     }
 
     public class Link

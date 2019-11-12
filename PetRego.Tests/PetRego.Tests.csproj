@@ -101,6 +101,7 @@
   <ItemGroup>
     <Compile Include="Context\TestPetRegoContext.cs" />
     <Compile Include="Controllers\TestOwnersController.cs" />
+    <Compile Include="Controllers\TestOwnersV2Controller.cs" />
     <Compile Include="Controllers\TestPetControllers.cs" />
     <Compile Include="DbSet\TestDbSet.cs" />
     <Compile Include="DbSet\TestOwnerDbSet.cs" />
