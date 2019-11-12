@@ -1,30 +1,13 @@
 ﻿/*
-Contains OwnersController class with method definitions for CRUD operations on Owner Entity.
+Contains OwnersV2Controller class with method definitions for CRUD operations on Owner Entity.
 
-Build 101 :
-    Added Methods for CRUD operations which accepts and provides Owner Entity.
+Build 202 :
+    Added Methods for CRUD operations which accepts Owner Entity and provides OwnerDTO Entity.
+    Added contructor with service interface containing petV2DTO as generic parameter 
+    so that the service methods provides implementation related to petV2DTO.
+    Added the configuration in Unity Container Package to register Owner service interface with Owner service class 
+    both with petV2DTO as generic parameter. The configuration is added in WebApiConfig.
 
-Build 102 :
-    Added contructor with Context interface parameter to allow Dependency injection for Context class.
-    Removed Controller's dependency on Entity Framework.
-
-Build 103 :
-    Updated constructor with service interface parameter to allow Dependency injection for service class. Allows Unit Testing.
-    Used OwnerService methods to handle requests for CRUD operations on Owner Entity.
-    Changes the Response in Type of OwnerDTO instead of Owner. Allows Response to contain HATEOAS links
-    Added Unit Testing in Tests package to perform unit testing.
-
-Build 104 :
-    Added Unity Container Package to register Owner service interface with Owner service class. The configuration is added in WebApiConfig.
-    Provides complete independency. i.e. owner Controller is completely independent of owner Service class implementation.
-
-Build 105 :
-    Added condition in post method to achieve idempotency.
-    Improved Exception Handling.
-
-Build 201 :
-    Added petDTO as generic parameter to implement generic Owner service class.
-    This does not affect any of the version one CRUD operations.
 */
 
 using System;
@@ -42,35 +25,37 @@ using PetRego.Service;
 
 namespace PetRego.Controllers
 {
-    public class OwnersController : ApiController
+    public class OwnersV2Controller : ApiController
     {
-        private IOwnerService<PetDTO> ownerservice;
+        private IOwnerService<PetV2DTO> ownerservice;
 
-        public OwnersController() { }
-        private PetDTO petDTO = new PetDTO();
+        public OwnersV2Controller() { }
+        private PetV2DTO petV2DTO = new PetV2DTO();
 
-        public OwnersController(IOwnerService<PetDTO> _ownerservice)
+        public OwnersV2Controller(IOwnerService<PetV2DTO> _ownerservice)
         {
             this.ownerservice = _ownerservice;
-            this.petDTO = new PetDTO();
+            this.petV2DTO = new PetV2DTO();
         }
 
         // GET: api/Owners
-        [Route("api/Owners", Name = "GetOwners")]
-        public IQueryable<OwnerDTO<PetDTO>> GetOwners()
+        [HttpGet]
+        [Route("api/V2/Owners", Name = "GetV2Owners")]
+        public IQueryable<OwnerDTO<PetV2DTO>> GetOwners()
         {
             string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<OwnerDTO<PetDTO>> ownerdtos = ownerservice.GetAll(url, petDTO);
+            IQueryable<OwnerDTO<PetV2DTO>> ownerdtos = ownerservice.GetAll(url, petV2DTO);
             return ownerdtos;
         }
 
         // GET: api/Owners/5
-        [Route("api/Owners/{id}", Name = "GetOwnerById")]
-        [ResponseType(typeof(OwnerDTO<PetDTO>))]
+        [HttpGet]
+        [Route("api/V2/Owners/{id}", Name = "GetV2OwnerById")]
+        [ResponseType(typeof(OwnerDTO<PetV2DTO>))]
         public IHttpActionResult GetOwner(int id)
         {
             string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            OwnerDTO<PetDTO> ownerdto = ownerservice.GetDTOByID(id, url, petDTO);
+            OwnerDTO<PetV2DTO> ownerdto = ownerservice.GetDTOByID(id, url, petV2DTO);
             if (ownerdto == null)
             {
                 return NotFound();
@@ -79,8 +64,9 @@ namespace PetRego.Controllers
         }
 
         // PUT: api/Owners/5
-        [Route("api/Owners/{id}", Name = "UpdateOwners")]
-        [ResponseType(typeof(OwnerDTO<PetDTO>))]
+        [HttpPut]
+        [Route("api/V2/Owners/{id}", Name = "UpdateV2Owners")]
+        [ResponseType(typeof(OwnerDTO<PetV2DTO>))]
         public IHttpActionResult PutOwner(int id, Owner owner)
         {
             if (!ModelState.IsValid)
@@ -97,27 +83,28 @@ namespace PetRego.Controllers
             {
                 return NotFound();
             }
-            OwnerDTO<PetDTO> ownerdto = new OwnerDTO<PetDTO>(new PetDTO());
+            OwnerDTO<PetV2DTO> ownerdto = new OwnerDTO<PetV2DTO>(new PetV2DTO());
             try
             {
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                ownerdto = ownerservice.Update(owner, url, petDTO);
+                ownerdto = ownerservice.Update(owner, url, petV2DTO);
             }
-            catch(DbUpdateConcurrencyException e)
+            catch (DbUpdateConcurrencyException e)
             {
                 return BadRequest("The Pet Ids do not belong to the user.");
             }
             catch (Exception e)
             {
-                    return InternalServerError(e);
+                return InternalServerError(e);
             }
 
             return Ok(ownerdto);
         }
 
         // POST: api/Owners
-        [Route("api/Owners", Name = "CreateOwners")]
-        [ResponseType(typeof(OwnerDTO<PetDTO>))]
+        [HttpPost]
+        [Route("api/V2/Owners", Name = "CreateV2Owners")]
+        [ResponseType(typeof(OwnerDTO<PetV2DTO>))]
         public IHttpActionResult PostOwner(Owner owner)
         {
             if (!ModelState.IsValid)
@@ -128,11 +115,11 @@ namespace PetRego.Controllers
             {
                 return BadRequest("Owner already Exist");
             }
-            OwnerDTO<PetDTO> ownerdto = new OwnerDTO<PetDTO>(new PetDTO());
+            OwnerDTO<PetV2DTO> ownerdto = new OwnerDTO<PetV2DTO>(new PetV2DTO());
             try
             {
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                ownerdto = ownerservice.Add(owner, url, petDTO);
+                ownerdto = ownerservice.Add(owner, url, petV2DTO);
             }
             catch (Exception e)
             {
@@ -143,7 +130,8 @@ namespace PetRego.Controllers
         }
 
         // DELETE: api/Owners/5
-        [Route("api/Owners/{id}", Name = "DeleteOwners")]
+        [HttpDelete]
+        [Route("api/V2/Owners/{id}", Name = "DeleteV2Owners")]
         [ResponseType(typeof(Owner))]
         public IHttpActionResult DeleteOwner(int id)
         {

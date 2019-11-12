@@ -17,6 +17,7 @@ Build 105 :
 
 Build 201 :
     Added petDTO as generic parameter to implement generic Pet service class.
+    This does not affect any of the version one CRUD operations.
 */
 
 using System;
