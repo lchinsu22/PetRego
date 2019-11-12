@@ -1,26 +1,4 @@
-﻿/*
-Contains PetController class with method definitions for CRUD operations on Pet Entity. 
-
-Build 103 :
-    Added Methods for CRUD operations which accepts and provides PetDTO Entity.
-    Added constructor with service interface parameter to allow Dependency injection for service class. Allows Unit Testing.
-    Used PetService methods to handle requests for CRUD operations on Pet Entity.
-    Provides the Response in Type of petDTO Entity. Response also contains HATEOAS links
-
-Build 104 :
-    Added Unity Container Package to register Pet service interface with Pet service class. The configuration is added in WebApiConfig.
-    Provides complete independency. i.e. Pet Controller is completely independent of pet class implementation.
-
-Build 105 :
-    Added condition in post method to achieve idempotency.
-    Improved Exception Handling.
-
-Build 201 :
-    Added petDTO as generic parameter to implement generic Pet service class.
-    This does not affect any of the version one CRUD operations.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -35,57 +13,59 @@ using PetRego.Service;
 
 namespace PetRego.Controllers
 {
-    public class PetsController : ApiController
+    public class PetsV2Controller : ApiController
     {
-        private IPetService<PetDTO> petservice;
-        private PetDTO petDTO = new PetDTO();
 
-        public PetsController() { }
+        private IPetService<PetV2DTO> petservice;
+        private PetV2DTO petV2DTO = new PetV2DTO();
 
-        public PetsController(IPetService<PetDTO> _petservice)
+        public PetsV2Controller() { }
+
+        public PetsV2Controller(IPetService<PetV2DTO> _petservice)
         {
             this.petservice = _petservice;
-            this.petDTO = new PetDTO();
+            this.petV2DTO = new PetV2DTO();
         }
 
         // GET: api/Pets
-        [Route("api/Pets", Name = "GetPets")]
-        public IQueryable<PetDTO> GetPets()
+        [HttpGet]
+        [Route("api/V2/Pets", Name = "GetV2Pets")]
+        public IQueryable<PetV2DTO> GetPets()
         {
-            string url = Url.Link("GetPets", null);
-            url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<PetDTO> petdtos = petservice.GetAll(url, petDTO);
-            return petdtos;
+            string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            IQueryable<PetV2DTO> petv2dtos = petservice.GetAll(url, petV2DTO);
+            return petv2dtos;
         }
 
         //Allows user to search Pets Owned by a User
-        [Route("api/Owners/{id}/Pets", Name = "GetPetsByOwnerId")]
-        public IQueryable<PetDTO> GetPetsByOwnerId(int id)
+        [HttpGet]
+        [Route("api/V2/Owners/{id}/Pets", Name = "GetV2PetsByOwnerId")]
+        public IQueryable<PetV2DTO> GetPetsByOwnerId(int id)
         {
-            string url = Url.Link("GetPetById", id);
-            url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            IQueryable<PetDTO> petdtos = petservice.GetPetsByOwnerId(id, url, petDTO);
-            return petdtos;
+            string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            IQueryable<PetV2DTO> petv2dtos = petservice.GetPetsByOwnerId(id, url, petV2DTO);
+            return petv2dtos;
         }
 
         // GET: api/Pets/5
-        [Route("api/Pets/{id}", Name = "GetPetById")]
-        [ResponseType(typeof(PetDTO))]
+        [HttpGet]
+        [Route("api/V2/Pets/{id}", Name = "GetV2PetById")]
+        [ResponseType(typeof(PetV2DTO))]
         public IHttpActionResult GetPet(int id)
         {
-            string url = Url.Link("GetPetById", id);
-            url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            PetDTO petdto = petservice.GetDTOByID(id, url, petDTO);
-            if (petdto == null)
+            string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+            PetV2DTO petv2dto = petservice.GetDTOByID(id, url, petV2DTO);
+            if (petv2dto == null)
             {
                 return NotFound();
             }
-            return Ok(petdto);
+            return Ok(petv2dto);
         }
 
         // PUT: api/Pets/5
-        [Route("api/Pets/{id}", Name = "UpdatePets")]
-        [ResponseType(typeof(PetDTO))]
+        [HttpPut]
+        [Route("api/V2/Pets/{id}", Name = "UpdateV2Pets")]
+        [ResponseType(typeof(PetV2DTO))]
         public IHttpActionResult PutPet(int id, Pet pet)
         {
             if (!ModelState.IsValid)
@@ -101,12 +81,11 @@ namespace PetRego.Controllers
             {
                 return NotFound();
             }
-            PetDTO petdto = new PetDTO();
+            PetV2DTO petv2dto = new PetV2DTO();
             try
             {
-                string url = Url.Link("UpdatePets", id);
-                url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                petdto = petservice.Update(pet, url, petDTO);
+                string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
+                petv2dto = petservice.Update(pet, url, petV2DTO);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -120,12 +99,13 @@ namespace PetRego.Controllers
                 }
             }
 
-            return Ok(petdto);
+            return Ok(petv2dto);
         }
 
         // POST: api/Pets
-        [Route("api/Pets", Name = "CreatePets")]
-        [ResponseType(typeof(PetDTO))]
+        [HttpPost]
+        [Route("api/V2/Pets", Name = "CreateV2Pets")]
+        [ResponseType(typeof(PetV2DTO))]
         public IHttpActionResult PostPet(Pet pet)
         {
             if (!ModelState.IsValid)
@@ -141,23 +121,24 @@ namespace PetRego.Controllers
             {
                 return BadRequest("Owner Id is required.");
             }
-            PetDTO petdto = new PetDTO();
+            PetV2DTO petv2dto = new PetV2DTO();
             try
             {
                 string url = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                petdto = petservice.Add(pet, url, petDTO);
+                petv2dto = petservice.Add(pet, url, petV2DTO);
             }
             catch (Exception e)
             {
                 return InternalServerError(e);
             }
 
-            return Created("CreatePets", petdto);
+            return Created("CreatePets", petv2dto);
         }
 
         // DELETE: api/Pets/5
-        [Route("api/Pets/{id}", Name = "DeletePets")]
-        [ResponseType(typeof(PetDTO))]
+        [HttpDelete]
+        [Route("api/V2/Pets/{id}", Name = "DeleteV2Pets")]
+        [ResponseType(typeof(PetV2DTO))]
         public IHttpActionResult DeletePet(int id)
         {
             Pet pet = petservice.GetByID(id);
