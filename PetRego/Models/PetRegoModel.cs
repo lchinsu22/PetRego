@@ -161,11 +161,15 @@ namespace PetRego.Models
                 */
                 if (this.PetName.Equals(pet.PetName))
                 {
-                    Debug.WriteLine("Owner names are same - " + this.PetName + " - " + pet.PetName);
+                    Debug.WriteLine("Pet names are same - " + this.PetName + " - " + pet.PetName);
                 }
                 if (this.PetType.Equals(pet.PetType))
                 {
-                    Debug.WriteLine("Pet counts are same - " + this.PetType + " - " + pet.PetType);
+                    Debug.WriteLine("Pet Types are same - " + this.PetType + " - " + pet.PetType);
+                }
+                if (this.OwnerId.Equals(pet.OwnerId))
+                {
+                    Debug.WriteLine("Owner Ids are same - " + this.PetType + " - " + pet.PetType);
                 }
                 return (this.PetName.Equals(pet.PetName)) && (this.PetType.Equals(pet.PetType));
             }

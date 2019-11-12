@@ -251,6 +251,7 @@
     <Compile Include="Controllers\OwnersController.cs" />
     <Compile Include="Controllers\OwnersV2Controller.cs" />
     <Compile Include="Controllers\PetsController.cs" />
+    <Compile Include="Controllers\PetsV2Controller.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

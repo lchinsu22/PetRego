@@ -50,7 +50,14 @@ namespace PetRego.Service
         {
 
             Owner owner = db.Owners.FirstOrDefault(p => p.OwnerId == id);
-            return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
+            if(owner != null)
+            {
+                return Mapper<T>.MapToOwnerDTO(owner, url, Ipetdto);
+            }else
+            {
+                return null;
+            }
+            
         }
 
         public Owner GetByID(int id)
